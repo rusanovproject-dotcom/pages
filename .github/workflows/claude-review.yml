@@ -1,0 +1,57 @@
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  id-token: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Claude Code Review
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            Review the changed files in this pull request.
+
+            Focus on:
+            - Bugs and logic errors
+            - Security (SQL injection, XSS, auth, secret leaks, SSRF)
+            - Performance (N+1 queries, unnecessary loops, blocking I/O)
+            - Type safety (TypeScript strictness, missing null checks)
+            - Error handling (swallowed exceptions, missing try/catch at boundaries)
+            - Adherence to project conventions described in CLAUDE.md
+
+            Ignore:
+            - Content/copy changes in markdown (.md) files unless they contain code
+            - Design assets, images, static content
+            - Pure documentation without code
+
+            Format:
+            - Post inline comments on the specific lines where issues exist
+            - Keep feedback concise and actionable ("change X to Y because Z")
+            - Write in Russian
+            - End with a summary comment that MUST contain:
+              1. Brief assessment in Russian (1-2 sentences)
+              2. On a new line, ONE explicit verdict (exactly one of):
+                 🟢 MERGE-READY — никаких блокеров, можно мержить
+                 🟡 MINOR ISSUES — мержить можно, но почитай комменты
+                 🔴 DO NOT MERGE — есть критичные баги/безопасность/архитектура
+              3. If 🔴 — bullet list of what must be fixed before merge
+
+            If the PR is trivial (typo, README, pure docs without code) — skip inline comments and post just:
+            "🟢 MERGE-READY — тривиальный PR, нечего ревьюить со стороны кода."
+          claude_args: "--max-turns 15 --model claude-sonnet-4-6"
