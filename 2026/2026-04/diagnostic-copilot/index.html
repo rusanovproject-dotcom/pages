@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Diagnostic Copilot — копилот для экспертов: презентации, КП и follow-up автоматом. 5 сделок за 6 недель — или возврат.">
+<title>Diagnostic Copilot — верни себе 20 часов в неделю</title>
+<style>
+  /* ---------- РЕСЕТ И БАЗА ---------- */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+    background: #0E1116;
+    color: #E8EAED;
+    line-height: 1.55;
+    font-size: 17px;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+  }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; text-decoration: none; }
+
+  /* ---------- ПАЛИТРА (Diagnostic Copilot) ----------
+     Гипотеза: тёмная база (фокус, серьёзность) + тёплый янтарный акцент
+     (энергия, «верни время»). Без неонов и нейро-синевы.
+     #0E1116  — base / фон
+     #161B22  — surface (карточки, секции)
+     #1F2630  — surface-2 (вложенные блоки)
+     #2A3340  — borders / разделители
+     #E8EAED  — основной текст
+     #9AA4B2  — вторичный текст
+     #F5A524  — акцент (янтарь, CTA)
+     #E08E0B  — акцент при hover
+     #F0F3F8  — белёсый для H1
+     #2EBD85  — успех (галочки, гарантия)
+     #E5484D  — предупреждение (точечно)
+  */
+
+  .container {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  /* ---------- ТИПОГРАФИКА ---------- */
+  h1, h2, h3, h4 {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #F0F3F8;
+    line-height: 1.15;
+  }
+  h1 { font-size: clamp(32px, 5.5vw, 56px); }
+  h2 { font-size: clamp(26px, 4vw, 40px); margin-bottom: 24px; }
+  h3 { font-size: clamp(20px, 2.5vw, 26px); margin-bottom: 12px; }
+  h4 { font-size: 18px; margin-bottom: 8px; }
+  p  { margin-bottom: 14px; color: #C7CDD6; }
+  ul { padding-left: 22px; margin-bottom: 14px; }
+  li { margin-bottom: 8px; color: #C7CDD6; }
+  strong { color: #E8EAED; font-weight: 600; }
+
+  .section { padding: 80px 0; border-top: 1px solid #2A3340; }
+  .section:first-of-type { border-top: none; }
+
+  /* ---------- КНОПКИ ---------- */
+  .btn {
+    display: inline-block;
+    padding: 18px 32px;
+    background: #F5A524;
+    color: #0E1116;
+    font-weight: 700;
+    font-size: 17px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: transform .15s ease, background .15s ease;
+    text-align: center;
+    letter-spacing: -0.01em;
+  }
+  .btn:hover { background: #E08E0B; transform: translateY(-1px); }
+  .btn-block { display: block; width: 100%; }
+  .btn-large { padding: 22px 38px; font-size: 19px; }
+
+  /* ---------- 1. HERO ---------- */
+  .hero {
+    padding: 100px 0 90px;
+    background:
+      radial-gradient(circle at 85% 15%, rgba(245, 165, 36, 0.10), transparent 55%),
+      radial-gradient(circle at 10% 90%, rgba(245, 165, 36, 0.06), transparent 50%),
+      #0E1116;
+    border-top: none;
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 60px;
+    align-items: center;
+  }
+  .hero h1 { margin-bottom: 24px; }
+  .hero .subhead {
+    font-size: clamp(18px, 2vw, 22px);
+    color: #C7CDD6;
+    margin-bottom: 36px;
+    line-height: 1.45;
+  }
+  .hero .subhead .accent { color: #F5A524; font-weight: 600; }
+  .hero-cta-row {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+  }
+  .hero-meta {
+    color: #9AA4B2;
+    font-size: 14px;
+  }
+  .hero-meta strong { color: #E8EAED; }
+
+  .hero-visual {
+    background: #161B22;
+    border: 1px solid #2A3340;
+    border-radius: 16px;
+    padding: 28px;
+    min-height: 360px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6E7787;
+    font-size: 14px;
+    text-align: center;
+    line-height: 1.5;
+  }
+  /* <!-- ИЗОБРАЖЕНИЕ: Hero — сплит-экран. Слева — эксперт в 23:00 за 7 вкладками (тёмно, чай, телефон). Справа — он же в 19:00, одна вкладка с отчётом, свет включён. По диагонали через оба экрана таймер «-20 часов в неделю». Снято как реальная съёмка дома, без стоковых лиц и AI-сияний. --> */
+
+  /* ---------- 2. КОМУ ---------- */
+  .who { background: #0E1116; }
+  .who-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 32px;
+    margin-bottom: 32px;
+  }
+  .who-list li {
+    list-style: none;
+    padding-left: 32px;
+    position: relative;
+    color: #C7CDD6;
+  }
+  .who-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 8px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #1F2630;
+    border: 2px solid #F5A524;
+  }
+  .who-note {
+    background: #161B22;
+    border-left: 3px solid #F5A524;
+    padding: 20px 24px;
+    border-radius: 6px;
+    color: #C7CDD6;
+  }
+
+  /* ---------- 3. ЧТО ВНУТРИ ---------- */
+  .modules { background: #0B0E13; }
+  .module {
+    background: #161B22;
+    border: 1px solid #2A3340;
+    border-radius: 14px;
+    padding: 32px;
+    margin-bottom: 20px;
+  }
+  .module-tag {
+    display: inline-block;
+    background: rgba(245, 165, 36, 0.12);
+    color: #F5A524;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 4px;
+    margin-bottom: 14px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  .module h3 { margin-bottom: 14px; }
+  .module-callout {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #2A3340;
+    color: #9AA4B2;
+    font-size: 15px;
+  }
+  .module-callout strong { color: #F5A524; }
+
+  /* ---------- 4. ГАРАНТИЯ ---------- */
+  .guarantee {
+    background:
+      radial-gradient(circle at 80% 30%, rgba(46, 189, 133, 0.06), transparent 60%),
+      #0E1116;
+  }
+  .guarantee-headline {
+    font-size: clamp(24px, 3vw, 32px);
+    color: #F0F3F8;
+    margin-bottom: 28px;
+    line-height: 1.3;
+  }
+  .guarantee-headline .accent { color: #2EBD85; }
+  .filters {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 28px;
+  }
+  .filter {
+    background: #161B22;
+    border: 1px solid #2A3340;
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .filter-num {
+    display: inline-block;
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    background: #F5A524;
+    color: #0E1116;
+    border-radius: 50%;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 14px;
+  }
+  .filter h4 { color: #E8EAED; }
+  .filter p { font-size: 14px; color: #9AA4B2; margin-bottom: 0; }
+
+  /* ---------- 5. ЦЕНА ---------- */
+  .pricing { background: #0B0E13; }
+  .pricing-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-bottom: 28px;
+    overflow: hidden;
+    border-radius: 12px;
+    border: 1px solid #2A3340;
+  }
+  .pricing-table th,
+  .pricing-table td {
+    padding: 18px 20px;
+    text-align: left;
+    border-bottom: 1px solid #2A3340;
+    color: #C7CDD6;
+    font-size: 15px;
+  }
+  .pricing-table thead {
+    background: #161B22;
+  }
+  .pricing-table th {
+    color: #F0F3F8;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  .pricing-table tbody tr:last-child td { border-bottom: none; }
+  .pricing-table .tier-name { color: #F5A524; font-weight: 700; }
+  .price-note {
+    background: #161B22;
+    padding: 20px 24px;
+    border-radius: 10px;
+    color: #C7CDD6;
+    border-left: 3px solid #F5A524;
+  }
+
+  /* ---------- 6. КЕЙСЫ ---------- */
+  .cases { background: #0E1116; }
+  .case {
+    background: #161B22;
+    border: 1px solid #2A3340;
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+  .case h3 {
+    font-size: 20px;
+    color: #F5A524;
+    margin-bottom: 14px;
+  }
+  .case-quote {
+    font-style: italic;
+    color: #E8EAED;
+    border-left: 3px solid #F5A524;
+    padding-left: 14px;
+    margin: 14px 0;
+  }
+  .case-tactic {
+    background: #1F2630;
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin-top: 14px;
+    font-size: 15px;
+    color: #C7CDD6;
+  }
+  .case-tactic strong { color: #F5A524; }
+
+  /* ---------- 7. FAQ ---------- */
+  .faq { background: #0B0E13; }
+  details.faq-item {
+    background: #161B22;
+    border: 1px solid #2A3340;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    padding: 20px 24px;
+    cursor: pointer;
+  }
+  details.faq-item[open] { border-color: #F5A524; }
+  details.faq-item summary {
+    font-weight: 600;
+    color: #F0F3F8;
+    font-size: 17px;
+    list-style: none;
+    position: relative;
+    padding-right: 32px;
+    line-height: 1.4;
+  }
+  details.faq-item summary::-webkit-details-marker { display: none; }
+  details.faq-item summary::after {
+    content: '+';
+    position: absolute;
+    right: 0;
+    top: 0;
+    font-size: 24px;
+    color: #F5A524;
+    font-weight: 400;
+    line-height: 1;
+  }
+  details.faq-item[open] summary::after { content: '−'; }
+  details.faq-item p {
+    margin-top: 14px;
+    color: #C7CDD6;
+  }
+
+  /* ---------- 8. FINAL CTA ---------- */
+  .final-cta {
+    background:
+      radial-gradient(circle at 50% 0%, rgba(245, 165, 36, 0.15), transparent 60%),
+      #0E1116;
+    text-align: center;
+    padding: 100px 0;
+  }
+  .final-cta h2 { margin-bottom: 28px; max-width: 740px; margin-left: auto; margin-right: auto; }
+  .final-cta-list {
+    text-align: left;
+    max-width: 640px;
+    margin: 0 auto 36px;
+    background: #161B22;
+    border: 1px solid #2A3340;
+    border-radius: 12px;
+    padding: 28px 32px;
+  }
+  .final-cta-list ol { padding-left: 22px; }
+  .final-cta-list li { color: #C7CDD6; margin-bottom: 12px; }
+  .final-cta-note {
+    color: #9AA4B2;
+    font-size: 15px;
+    max-width: 580px;
+    margin: 0 auto 32px;
+  }
+
+  /* ---------- ФУТЕР ---------- */
+  footer {
+    padding: 32px 0;
+    border-top: 1px solid #2A3340;
+    color: #6E7787;
+    font-size: 13px;
+    text-align: center;
+    background: #0B0E13;
+  }
+
+  /* ---------- АДАПТИВ ---------- */
+  @media (max-width: 860px) {
+    .hero-grid { grid-template-columns: 1fr; gap: 36px; }
+    .hero-visual { min-height: 240px; padding: 20px; }
+    .who-list { grid-template-columns: 1fr; }
+    .filters { grid-template-columns: 1fr; }
+    .section { padding: 56px 0; }
+    .hero { padding: 64px 0 56px; }
+    .module { padding: 24px; }
+    .case { padding: 22px; }
+    .final-cta { padding: 64px 0; }
+    .final-cta-list { padding: 22px 24px; }
+  }
+
+  @media (max-width: 480px) {
+    body { font-size: 16px; }
+    .btn { padding: 16px 24px; font-size: 16px; width: 100%; }
+    .pricing-table th, .pricing-table td { padding: 14px 12px; font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================== -->
+<!-- 1. FIRST SCREEN / HERO                          -->
+<!-- ============================================== -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div>
+        <h1>Верните себе 20 часов в неделю — копилот делает презентации, КП и follow-up, вы только проводите звонок.</h1>
+        <p class="subhead">И закрывает <span class="accent">5 сделок за 6 недель</span>. Не закрыл — вернём деньги.</p>
+        <div class="hero-cta-row">
+          <a href="https://senler-page-link/" class="btn btn-large">Записаться на бесплатный разбор одной диагностики</a>
+        </div>
+        <p class="hero-meta"><strong>60 минут.</strong> Прогоним твою запись через копилот ДО созвона. На встрече — конкретные таймкоды, где ты слил.</p>
+      </div>
+      <div class="hero-visual">
+        <!-- ИЗОБРАЖЕНИЕ: Hero сплит-экран. Слева — эксперт в 23:00, открыты 7 вкладок: Notion с шаблоном КП, Zoom-запись, Telegram «когда пришлёшь?», Google Doc лендинга, чашка чая, темно за окном. Справа — тот же эксперт в 19:00, одна вкладка с отчётом «КП Андрею ушло 14:32, follow-up #3 завтра», свет включён, телефон отложен. По диагонали через оба экрана — таймер «−20 часов в неделю». Без стоковых улыбок, без 3D-роботов, без AI-сияний. -->
+        Здесь будет hero-изображение<br>
+        (сплит-экран «23:00 vs 19:00»)
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================== -->
+<!-- 2. КОМУ ЭТО                                     -->
+<!-- ============================================== -->
+<section class="section who">
+  <div class="container">
+    <h2>Кому это</h2>
+    <p>Если ты сейчас:</p>
+    <ul class="who-list">
+      <li>проводишь 10 и больше диагностик в месяц, и каждая отнимает не час, а пять (звонок + подготовка + КП + дожимы);</li>
+      <li>знаешь свой скрипт наизусть, и тебя бесит объяснять одно и то же десятому человеку за неделю;</li>
+      <li>пишешь КП в 23:00, потому что днём опять был сплошной зум;</li>
+      <li>видишь по календарю 4 продающих звонка завтра и не можешь вспомнить кто эти люди;</li>
+      <li>боишься заболеть, потому что без тебя поток встанет;</li>
+      <li>помнишь конкретных людей, которым «не дожал», и не понимаешь почему,</li>
+    </ul>
+    <p>— ты в той точке, ради которой Diagnostic Copilot и собирался.</p>
+    <div class="who-note">
+      Если ты только думаешь начать продавать через диагностики, но не понимаешь как структурно и боишься слить лидов — Copilot даст тебе готовую структуру и подсказки в моменте. Не нужно сначала год учиться, чтобы потом начать.
+    </div>
+  </div>
+</section>
+
+<!-- ============================================== -->
+<!-- 3. ЧТО ВНУТРИ                                   -->
+<!-- ============================================== -->
+<section class="section modules">
+  <div class="container">
+    <h2>Что внутри</h2>
+    <p style="margin-bottom: 36px;">Четыре модуля под четыре фазы твоего цикла продажи. Описано не как «фичи AI», а как то, что у тебя физически перестаёт быть в календаре.</p>
+
+    <div class="module">
+      <span class="module-tag">Модуль 1 · До звонка</span>
+      <h3>Pre-call pack за 30 секунд</h3>
+      <p>Клиент заполняет анкету → копилот определяет архетип покупателя (их четыре, выделены по разбору 7 реальных диагностик), собирает досье из его соцсетей и сайта, генерит тебе короткий бриф: с чем человек пришёл, как с ним разговаривать, чего не говорить.</p>
+      <div class="module-callout">
+        <strong>Что у тебя пропадает из календаря:</strong> «полчаса перед звонком пробежать профиль клиента». Ты заходишь в Zoom уже подготовленным.
+      </div>
+      <!-- ИЗОБРАЖЕНИЕ: скриншот dashboard'а копилота с brief'ом по конкретному клиенту — имя, архетип, ключевые цитаты из анкеты, что не говорить. -->
+    </div>
+
+    <div class="module">
+      <span class="module-tag">Модуль 2 · На звонке</span>
+      <h3>Live-суфлёр</h3>
+      <p>Копилот слушает Zoom в реальном времени и подсказывает в наушник короткими фразами:</p>
+      <ul>
+        <li>«Сейчас спроси про деньги — он сам открыл тему».</li>
+        <li>«Архетип 2 — не продавай, дай ему говорить».</li>
+        <li>«Время произнести цену».</li>
+        <li>«Это возражение #5 из 12 — отвечай через гарантию, не через скидку».</li>
+      </ul>
+      <p>Ты говоришь и думаешь — техника считает паттерны и держит структуру. Не «вместо тебя», а рядом.</p>
+      <div class="module-callout">
+        <strong>Что у тебя пропадает из календаря:</strong> разборы «почему я слил Виталия», которые ты делаешь в голове три дня после звонка. Копилот говорит сразу.
+      </div>
+      <!-- ИЗОБРАЖЕНИЕ: скриншот Zoom-звонка с виджетом копилота в углу: 3 строки подсказок, таймер, индикатор talk/listen ratio. -->
+    </div>
+
+    <div class="module">
+      <span class="module-tag">Модуль 3 · После звонка</span>
+      <h3>Готовый комплект через 10 минут</h3>
+      <p>Через 10 минут после того, как ты нажал «End call», у тебя готов комплект:</p>
+      <ul>
+        <li>персональный лендинг для клиента с его именем и его задачей;</li>
+        <li>диагностическая карта — что у него болит и что ты предлагаешь;</li>
+        <li>КП с цифрами под его кейс;</li>
+        <li>7-дневная цепочка follow-up с автоответами на типовые возражения.</li>
+      </ul>
+      <p>Ты только ставишь подпись и нажимаешь «отправить».</p>
+      <div class="module-callout">
+        <strong>Что у тебя пропадает из календаря:</strong> 2 часа на КП после каждого звонка. Это 80 часов в месяц на твоих 10 диагностиках.
+      </div>
+      <!-- ИЗОБРАЖЕНИЕ: коллаж из 4 скриншотов — персональный лендинг, диаг.карта, КП, цепочка follow-up. -->
+    </div>
+
+    <div class="module">
+      <span class="module-tag">Модуль 4 · Контент</span>
+      <h3>Контент из транскриптов</h3>
+      <p>Каждый твой звонок — сырьё. Копилот вытаскивает дословные цитаты клиентов и собирает из них:</p>
+      <ul>
+        <li>посты в канал («вот как клиент сам сформулировал свою боль»);</li>
+        <li>короткие ролики на возражения;</li>
+        <li>DIY-инструкции из паттернов, которые повторяются.</li>
+      </ul>
+      <p>Контент перестаёт быть отдельной задачей. Он собирается из того, что ты и так делаешь.</p>
+      <div class="module-callout">
+        <strong>Что у тебя пропадает из календаря:</strong> «надо бы написать пост» в чек-листе на воскресенье.
+      </div>
+      <!-- ИЗОБРАЖЕНИЕ: транскрипт со звонка → стрелочка → 3 готовых поста в канал. -->
+    </div>
+  </div>
+</section>
+
+<!-- ============================================== -->
+<!-- 4. ГАРАНТИЯ                                     -->
+<!-- ============================================== -->
+<section class="section guarantee">
+  <div class="container">
+    <p class="guarantee-headline">Если за 6 недель работы по системе ты не закрыл 5 сделок — <span class="accent">возврат денег. Полностью.</span></p>
+    <p>Чтобы это обещание не было пустым, в Diagnostic Copilot берут не всех подряд. На бесплатном разборе одной твоей диагностики проверяются четыре вещи:</p>
+    <div class="filters">
+      <div class="filter">
+        <span class="filter-num">1</span>
+        <h4>Идёт ли к тебе минимум 8 диагностик в месяц</h4>
+        <p>Если идёт 2 — 5 сделок не возьмутся ниоткуда, дело не в технике.</p>
+      </div>
+      <div class="filter">
+        <span class="filter-num">2</span>
+        <h4>Стоит ли продукт от 30 000 ₽</h4>
+        <p>Если средний чек 5 тысяч, программа не окупится, даже если закрыть все 5.</p>
+      </div>
+      <div class="filter">
+        <span class="filter-num">3</span>
+        <h4>Есть оформленный продукт, не «идея»</h4>
+        <p>Нечего продавать — нечего и автоматизировать.</p>
+      </div>
+      <div class="filter">
+        <span class="filter-num">4</span>
+        <h4>4 часа в неделю на 6 недель</h4>
+        <p>Иначе купишь и не запустишь, как уже было с прошлым наставничеством за 200К.</p>
+      </div>
+    </div>
+    <p style="margin-top: 28px;">Если по одному из четырёх пунктов нет — на разборе тебе прямо скажут «сейчас не наш клиент» и не продадут. Это не маркетинговая отстройка, это страховка от того, чтобы ты потерял свои 60 тысяч и время.</p>
+  </div>
+</section>
+
+<!-- ============================================== -->
+<!-- 5. СКОЛЬКО СТОИТ                                -->
+<!-- ============================================== -->
+<section class="section pricing">
+  <div class="container">
+    <h2>Сколько стоит</h2>
+    <table class="pricing-table">
+      <thead>
+        <tr>
+          <th>Тариф</th>
+          <th>Кому</th>
+          <th>Цена</th>
+          <th>Срок</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="tier-name">Core</td>
+          <td>Эксперт продаёт сам, 8+ диагностик/мес</td>
+          <td>50 000 — 60 000 ₽</td>
+          <td>6 недель</td>
+        </tr>
+        <tr>
+          <td class="tier-name">Team</td>
+          <td>Команда из 2-5 диагностов</td>
+          <td>90 000 ₽</td>
+          <td>6 недель</td>
+        </tr>
+        <tr>
+          <td class="tier-name">Premium</td>
+          <td>Эксперт + личное сопровождение от автора</td>
+          <td>в разработке</td>
+          <td>—</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="price-note">
+      Окупаемость считается просто. Средний чек твоего продукта <strong>50 000 ₽ × 5 закрытых сделок = 250 000 ₽</strong> выручки за 6 недель. Программа окупается с первой сделки. Остальные 4 — твоя прибыль и 20 часов в неделю обратно.
+      <br><br>
+      Рассрочка по умолчанию: 30 + 30 через 3 недели. Половина оплаты — после первой закрытой сделки (pay-for-result), если страшно платить вперёд.
+    </div>
+  </div>
+</section>
+
+<!-- ============================================== -->
+<!-- 6. КЕЙСЫ                                        -->
+<!-- ============================================== -->
+<section class="section cases">
+  <div class="container">
+    <h2>Кейсы</h2>
+
+    <div class="case">
+      <h3>Налоговый консультант, СПб</h3>
+      <p>Пришла через DIY-пост «13 шагов». Прочитала, попробовала собрать сама, не получилось.</p>
+      <p class="case-quote">«Я не дура, но я не поняла ничего».</p>
+      <p>Купила до созвона, на самом созвоне не продавали — она уже решила. Сейчас на партнёрской модели, годовая выручка 1.7-4.2 млн.</p>
+      <div class="case-tactic">
+        <strong>Что увидел копилот:</strong> архетип «уже горячий с контента». Сигнал — открыто говорит «давно искала, пробовала сама». Тактика — не продавать. Любой неловкий заход в продажу убивает таких клиентов.
+      </div>
+      <!-- ИЗОБРАЖЕНИЕ: фото-плейсхолдер 1:1, портрет налогового консультанта (с её разрешения) или нейтральная иллюстрация — стол с ноутбуком и налоговыми документами. -->
+    </div>
+
+    <div class="case">
+      <h3>Владелец автосервиса + ПЭК + ремни</h3>
+      <p>Звонок 39 минут. На финальном вопросе «опиши идеальную систему, как если бы у тебя была команда AI-агентов» — он перечислил ровно компоненты Diagnostic Copilot. Зеркало: «ты сейчас описал то, что мы делаем, давай запустим». Купил на звонке.</p>
+      <div class="case-tactic">
+        <strong>Что увидел копилот:</strong> архетип «сам произнесёт оффер». Сигнал — в первые 5 минут открывает тему AI и автоматизации, позиционирует себя «ранним адаптером». Тактика — не продавать заранее, дотерпеть до финального вопроса.
+      </div>
+      <!-- ИЗОБРАЖЕНИЕ: производственная сцена — гараж/склад, владелец у ноутбука, без стоковости. -->
+    </div>
+
+    <div class="case">
+      <h3>Программист-Senior с хобби-практикой</h3>
+      <p>Возражение «ещё не начала продавать» закрыли не аргументом, а механизмом: персональный лендинг с её именем + 100% возврата + разрешение пропустить 2 сессии из 6 «можно не быть идеальной». Купила.</p>
+      <div class="case-tactic">
+        <strong>Что увидел копилот:</strong> архетип «спасатель близких». Сигнал — открывает темы про папу, подругу, выгорание, состояние. Тактика — не давить на боль с первого раза, не атаковать её техническое возражение в её зоне экспертизы. Перевод «это другой вопрос». Финальный артефакт — не звонок, а материальная вещь после.
+      </div>
+      <!-- ИЗОБРАЖЕНИЕ: рабочий стол программиста — два монитора, IDE, кружка кофе. -->
+    </div>
+  </div>
+</section>
+
+<!-- ============================================== -->
+<!-- 7. FAQ                                          -->
+<!-- ============================================== -->
+<section class="section faq">
+  <div class="container">
+    <h2>Частые вопросы</h2>
+
+    <details class="faq-item">
+      <summary>«Я уже всё умею. Десять лет продаю, скрипт свой знаю наизусть. Мне не нужен ассистент по продажам.»</summary>
+      <p>Diagnostic Copilot — не ассистент и не учитель. Три модуля из четырёх вообще не трогают сам звонок — они забирают подготовку, КП и follow-up. На самом звонке копилот не учит тебя продавать, он подсвечивает паттерны: «ты говоришь 67% времени — нормальный диалог 43%», «он трижды произнёс слово "дорого" — это не про цену, это про доверие». Дальше делать или не делать — твоё. Не веришь — приди на бесплатный разбор одной своей диагностики, посмотри что копилот скажет про неё. Если ничего нового не услышишь — не покупай.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary>«5 сделок за 6 недель — а если не получится?»</summary>
+      <p>Возврат денег. Полностью. И это не «попробуем доказать что виноват ты»: на разборе заранее проверили, что у тебя есть трафик на 8 диагностик в месяц и продукт от 30К. Если ты прошёл фильтр и не закрыл 5 сделок — это наша проблема, не твоя. Плюс половину оплаты можно отдать после первой сделки, не вперёд.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary>«Я уже покупал наставничество за 200К и не внедрил. Куплю и снова не внедрю.»</summary>
+      <p>Поэтому в фильтре есть пункт «4 часа в неделю на 6 недель». Если у тебя их нет — на разборе скажут «сейчас не наш клиент». Внутри программы — еженедельные 30-минутные созвоны проверки внедрения. Не «записи в облаке», а живой человек спрашивает «что ты сделал на этой неделе и что мешает».</p>
+    </details>
+
+    <details class="faq-item">
+      <summary>«Мои клиенты не разрешат записывать звонки.»</summary>
+      <p>Дадим скрипт, как фреймить запись в начале звонка — по практике 9 из 10 разрешают, потому что ты говоришь «чтобы потом сделать вам персональный материал, а не просто сводку». Кто не разрешил — копилот работает в режиме post-call: ты сам надиктовал ключевое после звонка, дальше всё то же самое.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary>«60 тысяч — много. Не уверен что окупится.»</summary>
+      <p>Считай на своих цифрах. Средний чек продукта × 5 сделок = выручка за 6 недель. У большинства клиентов программа окупается с первой сделки. Если у тебя средний чек 30К — окупаемость с двух. Если меньше 30К — ты не пройдёшь фильтр и деньги у тебя не возьмут.</p>
+    </details>
+  </div>
+</section>
+
+<!-- ============================================== -->
+<!-- 8. FINAL CTA                                    -->
+<!-- ============================================== -->
+<section class="final-cta">
+  <div class="container">
+    <h2>Запишись на бесплатный разбор одной своей диагностики (60 минут)</h2>
+    <div class="final-cta-list">
+      <ol>
+        <li>Прислонишь запись своего звонка (любого, недавнего).</li>
+        <li>Прогоним её через копилот при тебе. Покажем где слил, где почти продал, где архетип определил неправильно.</li>
+        <li>По 4 критериям проверим — наш ты клиент или нет. Если нет — скажем сразу, продавать не будем.</li>
+        <li>Если да — расскажем условия. Решение — твоё, тут и сейчас или через неделю.</li>
+      </ol>
+    </div>
+    <p class="final-cta-note">Это не «бесплатная консультация» в кавычках. Это технический разбор твоего звонка, после которого ты в любом случае знаешь, где у тебя дыры. Купишь — отлично. Не купишь — у тебя останется отчёт.</p>
+    <a href="https://senler-page-link/" class="btn btn-large">Записаться на разбор</a>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    Diagnostic Copilot · 2026
+  </div>
+</footer>
+
+</body>
+</html>
+
+<!--
+============================================================
+ЧЕК-ЛИСТ ДЛЯ СЕРЁГИ — ЧТО СДЕЛАТЬ ЧТОБЫ ЗАПУСТИТЬ
+============================================================
+
+1. ССЫЛКА CTA
+   Найди и замени `https://senler-page-link/` на реальную ссылку на
+   страницу записи в Senler. Встречается 2 раза (Hero + Final CTA).
+
+2. КАРТИНКИ (8 мест, помечены `<!-- ИЗОБРАЖЕНИЕ: ... -->`)
+   - Hero: сплит-экран «23:00 vs 19:00» (главный визуал)
+   - Модуль 1: скриншот dashboard'а с brief'ом по клиенту
+   - Модуль 2: скриншот Zoom с виджетом копилота
+   - Модуль 3: коллаж из 4 артефактов (лендинг + диаг.карта + КП + follow-up)
+   - Модуль 4: транскрипт → 3 поста
+   - Кейс 1: фото/иллюстрация налогового консультанта
+   - Кейс 2: производственная сцена автосервиса
+   - Кейс 3: рабочий стол программиста
+
+   Промпты для генерации — в файле:
+   diagnostic-copilot-image-prompts-2026-04-29.md
+
+   Чтобы вставить картинку: замени блок `.hero-visual` или `.module`
+   на <img src="URL" alt="описание"> с теми же стилями, или
+   подгружай в фон через `background-image: url('...')`.
+
+3. SENLER
+   Senler поддерживает кастомный HTML — вставляй весь этот файл целиком
+   как HTML-блок на странице. Шрифт Inter подгружается из system fallback,
+   если нужен точный — добавь в <head>:
+   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+4. АНАЛИТИКА
+   Перед запуском трафика — добавь Яндекс.Метрику или VK-пиксель
+   в <head>. Цели: клик по кнопке «Записаться на разбор», скролл до 50%/100%.
+
+5. SEO META (опционально)
+   Если будешь продвигать ещё и через поиск — обнови <title> и <meta description>
+   под ключи. Сейчас — нейтральные.
+
+6. ТЕСТ НА МОБИЛЬНОМ
+   Открой через iPhone/Android, проверь что hero не обрезается,
+   кнопка нажимается, FAQ раскрывается. Если что-то ломается —
+   скинь скриншот, поправлю.
+
+7. РЕАЛЬНЫЕ ЦИФРЫ В КЕЙСАХ
+   Кейс 1 (Татьяна) — цифра 1.7-4.2 млн стоит, как договорились.
+   Если решишь убрать — найти и удалить «Сейчас на партнёрской модели,
+   годовая выручка 1.7-4.2 млн».
+
+============================================================
+-->

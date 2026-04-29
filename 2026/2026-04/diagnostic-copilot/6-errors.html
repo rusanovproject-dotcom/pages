@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>6 фатальных ошибок на диагностике — Diagnostic Copilot</title>
+<style>
+  /* ============ PRINT SETUP ============ */
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  @media print {
+    html, body {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+      color-adjust: exact;
+    }
+  }
+
+  /* ============ RESET ============ */
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* ============ TYPOGRAPHY & BASE ============ */
+  :root {
+    --paper: #F7F2E8;
+    --ink: #1A1814;
+    --ink-soft: #4A463E;
+    --amber: #C8851A;
+    --amber-light: #F5A524;
+    --amber-bg: #FBE8B8;
+    --line: #D4CDB8;
+    --bordo: #7A1F1F;
+    --dark-bg: #161310;
+    --paper-on-dark: #F7F2E8;
+  }
+
+  body {
+    font-family: 'Georgia', 'Iowan Old Style', 'Apple Garamond', serif;
+    background: #888;
+    color: var(--ink);
+    line-height: 1.55;
+    font-size: 11pt;
+  }
+
+  /* ============ PAGE LAYOUT ============ */
+  .page {
+    width: 210mm;
+    height: 297mm;
+    background: var(--paper);
+    padding: 22mm 20mm;
+    margin: 10mm auto;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+    position: relative;
+    overflow: hidden;
+    page-break-after: always;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .page:last-child {
+    page-break-after: auto;
+  }
+
+  @media print {
+    body {
+      background: var(--paper);
+    }
+    .page {
+      margin: 0;
+      box-shadow: none;
+      width: 210mm;
+      height: 297mm;
+    }
+  }
+
+  /* ============ COVER (PAGE 1) ============ */
+  .cover {
+    background: var(--dark-bg);
+    color: var(--paper-on-dark);
+    padding: 0;
+    justify-content: space-between;
+    align-items: stretch;
+  }
+
+  .cover-inner {
+    padding: 30mm 22mm 22mm 22mm;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .cover-meta {
+    font-family: 'Helvetica Neue', 'Inter', system-ui, sans-serif;
+    font-size: 9pt;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--amber-light);
+  }
+
+  .cover-rule {
+    width: 40mm;
+    height: 2px;
+    background: var(--amber-light);
+    margin: 6mm 0 8mm 0;
+  }
+
+  .cover-title {
+    font-family: 'Georgia', serif;
+    font-size: 38pt;
+    line-height: 1.05;
+    font-weight: 400;
+    color: var(--paper-on-dark);
+    margin-bottom: 12mm;
+    letter-spacing: -0.01em;
+  }
+
+  .cover-title em {
+    font-style: italic;
+    color: var(--amber-light);
+  }
+
+  .cover-claim {
+    font-family: 'Georgia', serif;
+    font-size: 12pt;
+    line-height: 1.5;
+    color: rgba(247, 242, 232, 0.85);
+    max-width: 140mm;
+    margin-bottom: 4mm;
+  }
+
+  .cover-claim strong {
+    color: var(--paper-on-dark);
+  }
+
+  .cover-instruction {
+    font-family: 'Helvetica Neue', 'Inter', system-ui, sans-serif;
+    font-size: 10pt;
+    color: rgba(247, 242, 232, 0.65);
+    border-left: 2px solid var(--amber-light);
+    padding-left: 4mm;
+    margin-top: 6mm;
+  }
+
+  .cover-author {
+    font-family: 'Helvetica Neue', 'Inter', system-ui, sans-serif;
+    font-size: 9pt;
+    color: rgba(247, 242, 232, 0.55);
+    border-top: 1px solid rgba(247, 242, 232, 0.15);
+    padding-top: 5mm;
+  }
+
+  .cover-author strong {
+    color: var(--paper-on-dark);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  /* ============ TYPOGRAPHY — INTERNAL PAGES ============ */
+  .eyebrow {
+    font-family: 'Helvetica Neue', 'Inter', system-ui, sans-serif;
+    font-size: 8.5pt;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 4mm;
+  }
+
+  h1.section-title {
+    font-family: 'Georgia', serif;
+    font-size: 26pt;
+    line-height: 1.15;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 6mm;
+    letter-spacing: -0.01em;
+  }
+
+  h2.error-title {
+    font-family: 'Georgia', serif;
+    font-size: 22pt;
+    line-height: 1.15;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 7mm;
+    letter-spacing: -0.005em;
+  }
+
+  h2.error-title .num {
+    color: var(--amber);
+    font-style: italic;
+  }
+
+  h3.subhead {
+    font-family: 'Helvetica Neue', 'Inter', system-ui, sans-serif;
+    font-size: 9pt;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin: 5mm 0 2.5mm 0;
+    font-weight: 600;
+  }
+
+  p {
+    margin-bottom: 3mm;
+    font-size: 10.5pt;
+    line-height: 1.55;
+    color: var(--ink);
+  }
+
+  p strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  /* ============ FORMULATION CALLOUT ============ */
+  .formulation {
+    background: var(--amber-bg);
+    border-left: 3px solid var(--amber);
+    padding: 5mm 7mm;
+    margin: 4mm 0 4mm 0;
+    font-family: 'Georgia', serif;
+    font-size: 10.5pt;
+    line-height: 1.55;
+    color: var(--ink);
+    font-style: italic;
+    border-radius: 0 2px 2px 0;
+  }
+
+  .formulation::before {
+    content: '«';
+    font-size: 22pt;
+    color: var(--amber);
+    line-height: 0;
+    position: relative;
+    top: 5pt;
+    margin-right: 1mm;
+  }
+
+  .formulation::after {
+    content: '»';
+    font-size: 22pt;
+    color: var(--amber);
+    line-height: 0;
+    position: relative;
+    top: 5pt;
+    margin-left: 1mm;
+  }
+
+  .formulation p {
+    display: inline;
+    font-style: italic;
+    background: transparent;
+  }
+
+  .formulation-label {
+    font-family: 'Helvetica Neue', 'Inter', system-ui, sans-serif;
+    font-size: 8.5pt;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-top: 5mm;
+    margin-bottom: 2mm;
+    font-weight: 600;
+  }
+
+  .formulation-context {
+    font-family: 'Helvetica Neue', 'Inter', system-ui, sans-serif;
+    font-size: 9pt;
+    color: var(--ink-soft);
+    margin-top: 4mm;
+    margin-bottom: 1mm;
+    font-style: italic;
+  }
+
+  /* ============ FOOTER ============ */
+  .page-footer {
+    margin-top: auto;
+    padding-top: 6mm;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Helvetica Neue', 'Inter', system-ui, sans-serif;
+    font-size: 8pt;
+    color: var(--ink-soft);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* ============ INTRO PAGE ============ */
+  .intro-lead {
+    font-family: 'Georgia', serif;
+    font-size: 13pt;
+    line-height: 1.5;
+    color: var(--ink);
+    margin-bottom: 5mm;
+    font-style: italic;
+  }
+
+  .intro-loss {
+    font-family: 'Georgia', serif;
+    font-size: 17pt;
+    line-height: 1.3;
+    color: var(--bordo);
+    margin: 5mm 0;
+    font-weight: 400;
+    font-style: italic;
+  }
+
+  .key-insight {
+    background: var(--ink);
+    color: var(--paper-on-dark);
+    padding: 6mm 8mm;
+    margin: 6mm 0 0 0;
+    border-radius: 2px;
+  }
+
+  .key-insight .label {
+    font-family: 'Helvetica Neue', 'Inter', system-ui, sans-serif;
+    font-size: 8.5pt;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--amber-light);
+    margin-bottom: 3mm;
+    display: block;
+  }
+
+  .key-insight p {
+    color: var(--paper-on-dark);
+    font-size: 10.5pt;
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  /* ============ BULLETS ============ */
+  ul.compact {
+    list-style: none;
+    padding-left: 0;
+    margin: 3mm 0;
+  }
+
+  ul.compact li {
+    font-size: 10pt;
+    line-height: 1.5;
+    color: var(--ink);
+    padding-left: 6mm;
+    position: relative;
+    margin-bottom: 1.5mm;
+  }
+
+  ul.compact li::before {
+    content: '—';
+    color: var(--amber);
+    position: absolute;
+    left: 0;
+    font-weight: 600;
+  }
+
+  /* ============ FINAL PAGE ============ */
+  .final-bands {
+    margin: 5mm 0;
+    border-left: 2px solid var(--amber);
+    padding-left: 5mm;
+  }
+
+  .final-bands .band {
+    font-size: 10pt;
+    margin-bottom: 2mm;
+    line-height: 1.5;
+  }
+
+  .final-bands .band strong {
+    color: var(--bordo);
+  }
+
+  .cta-block {
+    background: var(--ink);
+    color: var(--paper-on-dark);
+    padding: 8mm;
+    margin: 6mm 0;
+    border-radius: 2px;
+  }
+
+  .cta-block h3 {
+    font-family: 'Georgia', serif;
+    font-size: 14pt;
+    color: var(--amber-light);
+    margin-bottom: 3mm;
+    font-weight: 400;
+  }
+
+  .cta-block p {
+    color: var(--paper-on-dark);
+    font-size: 10pt;
+    line-height: 1.5;
+    margin-bottom: 2mm;
+  }
+
+  .cta-block ol {
+    color: var(--paper-on-dark);
+    padding-left: 5mm;
+    margin: 3mm 0;
+  }
+
+  .cta-block ol li {
+    font-size: 10pt;
+    line-height: 1.5;
+    margin-bottom: 1.5mm;
+  }
+
+  .cta-button {
+    display: inline-block;
+    background: var(--amber-light);
+    color: var(--ink);
+    font-family: 'Helvetica Neue', 'Inter', system-ui, sans-serif;
+    font-size: 11pt;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 4mm 10mm;
+    text-decoration: none;
+    border-radius: 2px;
+    margin-top: 4mm;
+  }
+
+  .author-block {
+    margin-top: auto;
+    padding-top: 6mm;
+    border-top: 1px solid var(--line);
+    font-size: 9.5pt;
+    line-height: 1.5;
+    color: var(--ink-soft);
+  }
+
+  .author-block strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+</style>
+</head>
+<body>
+
+<!-- ============ PAGE 1 — COVER ============ -->
+<section class="page cover">
+  <div class="cover-inner">
+    <div>
+      <div class="cover-meta">Diagnostic Copilot · 2026</div>
+      <div class="cover-rule"></div>
+    </div>
+
+    <div>
+      <h1 class="cover-title">
+        6 фатальных<br>
+        ошибок на диагностике,<br>
+        которые сжигают <em>70% продаж</em>
+      </h1>
+
+      <p class="cover-claim">
+        <strong>Разбор 7 реальных продающих звонков.</strong>
+        У тех, кто допустил эти 6 ошибок — 0% продаж.
+        У тех, кто их закрыл — 57%.
+      </p>
+
+      <p class="cover-claim" style="font-size: 11pt; opacity: 0.8;">
+        Чек-лист для эксперта, который продаёт через диагностические созвоны.
+      </p>
+
+      <div class="cover-instruction">
+        Распечатай. Положи рядом с экраном.<br>
+        На следующем звонке отметь галочкой каждую из 6.
+      </div>
+    </div>
+
+    <div class="cover-author">
+      <strong>Никита Русанов</strong><br>
+      Помогаю экспертам перестать сливать дорогих клиентов на продающих звонках.
+    </div>
+  </div>
+</section>
+
+<!-- ============ PAGE 2 — INTRO ============ -->
+<section class="page">
+  <div class="eyebrow">Введение</div>
+  <h1 class="section-title">Зачем ты это читаешь</h1>
+
+  <p>Один из последних звонков, который я разбирал — Виталий из Новосибирска. Эксперт по сдаче коммерческой недвижимости в аренду. Звонок шёл 101 минуту. На 60-й минуте он уже был готов, я это видел по тону, по конкретике вопросов, по тому как он считал окупаемость вслух.</p>
+
+  <p class="intro-lead">Не купил.</p>
+
+  <p>Я разобрал транскрипт по таймкодам. Виталий не передумал. Виталий слил себя сам — на возражении, которое лежит в его профессиональной зоне. Он спросил «нейронка реально встроится в моё существующее ПО?» — это технический вопрос, в нём он эксперт. Вместо «давай это будет другой вопрос, на демо разберём» — я полез доказывать. Доказывать программисту что нейронка работает. На его поле. Он закрылся, попросил «КП в письменном виде», вышел из звонка, КП не открыл.</p>
+
+  <p class="intro-loss">Минус 60-90 тысяч выручки на одной фразе.</p>
+
+  <p>Это и есть «фатальная ошибка диагностики». Не «плохо продал в целом». Не «слабый эксперт». Один пропущенный или неправильно отыгранный элемент скрипта — и продажи нет.</p>
+
+  <h3 class="subhead">Что внутри</h3>
+
+  <p>Я разобрал 7 продающих звонков по транскриптам. У 4 из 7 — продажа состоялась. У 3 — нет. Когда я наложил кейсы друг на друга, оказалось: разница не в харизме, не в опыте, не в нише. Разница — в <strong>6 конкретных элементах</strong>, которые либо есть в звонке, либо нет.</p>
+
+  <p>У купивших — 5-6 из 6 элементов. У не-купивших — 1-2 из 6.</p>
+
+  <p>В этом PDF — каждый из 6 элементов: что это, что происходит когда его нет, сколько это стоит, что делать, готовая формулировка слово в слово.</p>
+
+  <div class="key-insight">
+    <span class="label">Главный инсайт</span>
+    <p>4 из 7 диагностик потеряны не на самих звонках. Не на «слабой подаче». Не на «не той цене». А на отсутствии элементов скрипта — структурных, банальных, тех, которые ты просто не вспомнил произнести в моменте.</p>
+  </div>
+
+  <div class="page-footer">
+    <span>Diagnostic Copilot</span>
+    <span>02</span>
+  </div>
+</section>
+
+<!-- ============ PAGE 3 — ERROR 1 ============ -->
+<section class="page">
+  <div class="eyebrow">Ошибка №1 из 6</div>
+  <h2 class="error-title"><span class="num">№1</span> — Нет фрейминга встречи в начале</h2>
+
+  <h3 class="subhead">Что это</h3>
+  <p>Первая минута звонка. Ты должен сказать клиенту три вещи: что мы будем делать ближайший час, в каком порядке, чем это закончится. Без этого клиент 60 минут сидит в защите — не понимает что будет, ждёт когда начнут «впаривать», на каждом твоём шаге внутренне спрашивает «а это уже продажа или ещё нет».</p>
+
+  <h3 class="subhead">Что произошло</h3>
+  <p>В моём разборе из 7 звонков <strong>фрейминг был сделан ноль раз</strong>. Каждый созвон начинался с «привет, как дела, расскажи о себе». Клиент рассказывает 15 минут, потом я задаю свои вопросы ещё 20 минут, потом начинаю «а вот у нас есть...» — и клиент уже в напряжении полчаса. Защита накопилась.</p>
+
+  <p>Особенно жёстко на Свете — РГП в Этажах, 25 риэлторов под ней. Сильная диагностика, я разобрал её бизнес как по полочкам, она кивала. К 50-й минуте я начал подходить к продукту — она ушла в сомнение. Потому что не понимала <em>куда мы идём</em>. Звонок зависнул. Не купила.</p>
+
+  <h3 class="subhead">Сколько стоит</h3>
+  <p>Один не-сделанный фрейминг = клиент в защите 60 минут = -50-100 тысяч выручки. На 10 звонках в месяц — минимум 1 потерянная продажа из-за тупо неназванной структуры встречи.</p>
+
+  <h3 class="subhead">Что делать</h3>
+  <p>На первой минуте, после короткого «привет», скажи план встречи. Три блока. Сколько времени каждый. Чем закончится.</p>
+
+  <div class="formulation-label">Формулировка слово в слово</div>
+  <div class="formulation">
+    Слушай, давай сразу зафиксирую как пройдёт встреча. У нас час. Первые 15 минут — я задаю вопросы про твой бизнес, чтобы понять с чем ты пришёл. Дальше 20-25 минут — я показываю как у нас это решается, на твоей конкретике. И в финале 15 минут — обсуждаем условия, если для тебя это окажется по делу. В конце ты либо говоришь "беру, давай стартанём", либо "не моё, спасибо за разбор". И то и другое — нормальный финал. Окей?
+  </div>
+
+  <p style="font-size: 9.5pt; color: var(--ink-soft); margin-top: 4mm;">Полминуты. Меняет всё. Клиент перестаёт ждать «что они там готовят» и начинает работать с тобой по структуре, которую он сам принял.</p>
+
+  <div class="page-footer">
+    <span>Diagnostic Copilot</span>
+    <span>03</span>
+  </div>
+</section>
+
+<!-- ============ PAGE 4 — ERROR 2 ============ -->
+<section class="page">
+  <div class="eyebrow">Ошибка №2 из 6</div>
+  <h2 class="error-title"><span class="num">№2</span> — Нет финального диагностического вопроса</h2>
+
+  <h3 class="subhead">Что это</h3>
+  <p>Финальный диагностический вопрос — последний вопрос блока диагностики, перед тем как ты начнёшь рассказывать про свой продукт. Звучит так: «представь, что у тебя в команде есть AI-агент на каждую задачу — что бы ты поручил ему в первую очередь?». Или: «опиши идеальную систему, которая бы решила твои текущие задачи».</p>
+
+  <p>Зачем он нужен. Клиент сам, своими словами, начинает перечислять компоненты твоего оффера. Дальше ты не «продаёшь» — ты говоришь «слушай, ты сейчас описал ровно то, что мы делаем. Давай покажу».</p>
+
+  <p>Это самый сильный закрывающий ход на звонке. Сильнее любой презентации. Потому что <strong>клиент сам произнёс свой оффер</strong>.</p>
+
+  <h3 class="subhead">Что произошло</h3>
+  <p>В кейсе Славы (автосервис + транспортная компания + точки продаж ремней — 3 параллельных бизнеса) этот вопрос был задан на 35-й минуте. Слава перечислил: AI-агент на разбор отзывов, агент на расчёт коммерческих, агент на найм линейного персонала, агент на анализ клиентской базы. Это ровно архитектура нашего продукта.</p>
+
+  <p>Я ответил: «Слав, ты сейчас описал то, что мы делаем. Давай запустим». Купил на звонке. Звонок 39 минут общим итогом.</p>
+
+  <p>В кейсах Виталия, Светы, Наташи — финальный диагностический вопрос <strong>не был задан ни разу</strong>. Я перешёл к продукту через «у нас есть программа» — без того чтобы клиент сам сформулировал зачем она ему. Защита включилась мгновенно. Ни одной продажи.</p>
+
+  <h3 class="subhead">Сколько стоит</h3>
+  <p>Один не-заданный финальный вопрос = ты сам тащишь продажу против защиты клиента. Конверсия падает в 2-3 раза. На 10 звонках в месяц — минус 2-3 продажи.</p>
+
+  <div class="formulation-label">Формулировка слово в слово</div>
+  <div class="formulation">
+    Хочу задать один вопрос перед тем как мы пойдём дальше. Представь, что у тебя есть команда AI-агентов — отдельный агент под каждую задачу твоего бизнеса. Что бы ты поручил им в первую очередь? Не думай как это технически устроено, просто перечисли что у тебя сейчас жжёт больше всего.
+  </div>
+
+  <div class="formulation-context">После ответа клиента:</div>
+  <div class="formulation">
+    Окей, слушай. Ты сейчас описал [перечисли его пункты]. Это ровно то, чем мы занимаемся. Давай покажу как это собирается на твоих процессах.
+  </div>
+
+  <div class="page-footer">
+    <span>Diagnostic Copilot</span>
+    <span>04</span>
+  </div>
+</section>
+
+<!-- ============ PAGE 5 — ERROR 3 ============ -->
+<section class="page">
+  <div class="eyebrow">Ошибка №3 из 6</div>
+  <h2 class="error-title"><span class="num">№3</span> — Нет резюме ценности перед ценой</h2>
+
+  <h3 class="subhead">Что это</h3>
+  <p>Перед тем как назвать цену, ты должен в одном абзаце суммировать всё, что клиент получит. Не «модули и фичи». А <strong>результат на его языке</strong> — теми же словами и цифрами, которые он сам называл в диагностике.</p>
+
+  <p>Без этого цена звучит в вакууме. Ты говоришь «60 тысяч» — а в голове у клиента нет к ним никакого якоря. 60 тысяч за что? За «вашу систему»? Цифра кажется большой, потому что не на что её повесить.</p>
+
+  <h3 class="subhead">Что произошло</h3>
+  <p>В моём разборе резюме ценности перед ценой не было сделано <strong>ни в одном из 7 звонков</strong>. Включая 4 успешных. Купившие купили вопреки этой ошибке — у них по другим причинам сошлось. Но 3 не-купивших — каждый споткнулся именно здесь.</p>
+
+  <p>Виталий сказал «дорого» через 5 секунд после того, как я назвал цифру. Не потому что дорого по его экономике (мы потом посчитали — окупалось с одной сделки). Потому что цифра прилетела в воздух, без подвешенной к ней ценности.</p>
+
+  <h3 class="subhead">Сколько стоит</h3>
+  <p>Возражение «дорого» в 70% случаев — это не про деньги. Это про то, что клиент не понял за что. На 10 звонках с этой ошибкой — у тебя минимум 3 клиента отвалятся «по цене», хотя реальная причина — отсутствие резюме.</p>
+
+  <h3 class="subhead">Что делать</h3>
+  <p>За 30 секунд до того как назвать цифру — в 3-4 предложениях суммируй что человек получает. На его словах. С его цифрами из диагностики.</p>
+
+  <div class="formulation-label">Формулировка слово в слово</div>
+  <div class="formulation">
+    Прежде чем скажу цифру — давай зафиксирую что ты получаешь за эти 6 недель. Первое — у тебя пропадает 25-30 часов в неделю на обвязку: КП, follow-up, подготовка к звонкам. Это твои "пишу КП в 23:00", о которых ты говорил. Второе — на каждом звонке копилот ловит архетип клиента и подсказывает в моменте — это про твою фразу "не понимаю почему слил Виталия". Третье — после 6 недель копилот остаётся у тебя как штатный инструмент, не выключается. И четвёртое — гарантия: если за 6 недель не закрыли 5 сделок, я возвращаю деньги полностью. Теперь цифра — 60 тысяч.
+  </div>
+
+  <p style="font-size: 9.5pt; color: var(--ink-soft); margin-top: 4mm;">Цифра упала на 4 повешенных якоря. Не в воздух.</p>
+
+  <div class="page-footer">
+    <span>Diagnostic Copilot</span>
+    <span>05</span>
+  </div>
+</section>
+
+<!-- ============ PAGE 6 — ERROR 4 ============ -->
+<section class="page">
+  <div class="eyebrow">Ошибка №4 из 6</div>
+  <h2 class="error-title"><span class="num">№4</span> — Цена не озвучена голосом на звонке</h2>
+
+  <h3 class="subhead">Что это</h3>
+  <p>На продающем звонке ты должен произнести цифру. Голосом. В моменте. Не «пришлю КП на почту, посмотришь», не «там в презентации всё описано», не «давай я тебе после звонка детали скину».</p>
+
+  <p>Если ты ушёл со звонка не назвав цифру — ты потерял момент. Дальше клиент остывает за 24 часа. Ты пишешь следом КП — он читает в обед, между делом, без эмоционального контекста разговора. Вероятность покупки падает в 3-5 раз.</p>
+
+  <h3 class="subhead">Что произошло</h3>
+  <p>Среди 3 не-купивших цена голосом на звонке была озвучена <strong>0 раз из 3</strong>. У всех троих был сценарий «обещаю прислать КП». Из 3 — купил 0. У 4 купивших — 2 раза цена прозвучала голосом (Саша, Слава), 2 раза — была заменена материальным артефактом сразу после звонка (Татьяна, Лариса), что технически тот же эффект «ценность вручается в моменте».</p>
+
+  <p>Самый болезненный кейс — Виталий. 101 минута звонка, я подошёл к продукту, сказал «вышлю детали в КП» вместо того чтобы назвать цифру. КП ушло через 4 часа. Виталий открыл. Не ответил. Я сделал follow-up через день — «думаю». Через 3 дня — «решил пока подождать». Не вернулся.</p>
+
+  <h3 class="subhead">Сколько стоит</h3>
+  <p>Каждый звонок без цены голосом = -50-70% вероятности продажи. Если ты делаешь 10 звонков в месяц и в 5 из них «обещал прислать КП» — это минимум 1-2 потерянные продажи каждый месяц.</p>
+
+  <h3 class="subhead">Что делать</h3>
+  <p>Назвать цифру вслух. Спокойно. Без оправданий. Без «но это очень окупается».</p>
+
+  <div class="formulation-label">Формулировка слово в слово</div>
+  <div class="formulation">
+    Программа стоит 60 тысяч. Это полная стоимость, без подписок и скрытых платежей. Есть рассрочка — 30 сейчас, 30 через 3 недели, чтобы не платить разом. Окупается с первой сделки на твоих цифрах. Что думаешь?
+  </div>
+
+  <p style="font-size: 9.5pt; color: var(--ink-soft); margin-top: 4mm;"><strong>Цифра. Пауза. Молчи.</strong> Не оправдывайся, не дополняй, не «но если что — есть варианты». Просто молчи и слушай его реакцию. Тот, кто первым заговорит после цифры — проиграл переговорную позицию.</p>
+
+  <div class="page-footer">
+    <span>Diagnostic Copilot</span>
+    <span>06</span>
+  </div>
+</section>
+
+<!-- ============ PAGE 7 — ERROR 5 ============ -->
+<section class="page">
+  <div class="eyebrow">Ошибка №5 из 6</div>
+  <h2 class="error-title"><span class="num">№5</span> — Нет закрытия с конкретной датой следующего шага</h2>
+
+  <h3 class="subhead">Что это</h3>
+  <p>В конце звонка — независимо от того сказал клиент «беру» или «надо подумать» — у тебя должен быть зафиксирован <strong>конкретный следующий шаг с датой и временем</strong>. «Подумай и напиши» — не считается. «Свяжемся как будут вопросы» — не считается. «Напомнишь мне на следующей неделе» — не считается.</p>
+
+  <p>Считается только: «давай в среду в 15:00 созвонимся на 15 минут — ты говоришь "да" или "нет"». Дата. Время. Длительность. Содержание.</p>
+
+  <h3 class="subhead">Что произошло</h3>
+  <p>Среди 3 не-купивших закрытие с конкретной датой было <strong>0 из 3</strong>. Все три — «подумаю», «напишу как буду готов», «посоветуюсь и решу». Никто не написал. Все три потерялись.</p>
+
+  <p>У 4 купивших — у каждого был зафиксирован конкретный следующий шаг. Слава купил на звонке. Татьяна — оплата до созвона + дата старта в течение недели. Лариса — «обсуждаем сегодня вечером, завтра в 14:00 короткий созвон 15 минут "да или нет"». Саша — оплата на звонке.</p>
+
+  <h3 class="subhead">Сколько стоит</h3>
+  <p>Каждый звонок без закрытия с датой = клиент с вероятностью 80% не вернётся. Из 10 звонков, где закрытие пропущено — у тебя 1-2 продажи. Из 10 звонков, где закрытие сделано — 4-6 продаж.</p>
+
+  <div class="formulation-context">Если клиент сказал «надо подумать»:</div>
+  <div class="formulation">
+    Понял — подумать. Давай сразу договоримся: послезавтра, в 16:00, созваниваемся на 15 минут. Ты приходишь с одним из трёх ответов — "беру и стартуем", "не беру и расходимся", или "беру, но есть вопрос Х — закрой и стартуем". Любой из трёх — нормально. Главное чтобы это не висело неделю. Окей?
+  </div>
+
+  <div class="formulation-context">Если клиент сказал «надо посоветоваться с партнёром»:</div>
+  <div class="formulation">
+    Отлично. Ты обсуждаешь сегодня или завтра. В четверг в 11:00 созваниваемся на 15 минут — твой ответ "да" или "нет". Я тебе сейчас пришлю короткое описание программы на одну страницу, чтобы партнёр не из воздуха решал.
+  </div>
+
+  <div class="page-footer">
+    <span>Diagnostic Copilot</span>
+    <span>07</span>
+  </div>
+</section>
+
+<!-- ============ PAGE 8 — ERROR 6 ============ -->
+<section class="page">
+  <div class="eyebrow">Ошибка №6 из 6</div>
+  <h2 class="error-title"><span class="num">№6</span> — Атака на техническое возражение в зоне экспертизы клиента</h2>
+
+  <h3 class="subhead">Что это</h3>
+  <p>Когда клиент задаёт технический вопрос внутри своей профессиональной зоны — программист про архитектуру, юрист про юридические нюансы, маркетолог про метрики — у тебя есть два пути.</p>
+
+  <p><strong>Путь первый:</strong> пытаться ответить и доказать. Это путь в слив. Ты доказываешь специалисту в его поле. Любой ответ, который ты дашь, он разнесёт. Не потому что ты не прав — а потому что в его голове 200 нюансов, которые ты не учитываешь.</p>
+
+  <p><strong>Путь второй:</strong> вынести этот вопрос за рамки разговора. «Это другой вопрос, разберём отдельно». Не как уход от ответа — как фрейминг «сейчас обсуждаем общую структуру, технику закроем на отдельной встрече с твоим CTO».</p>
+
+  <h3 class="subhead">Что произошло</h3>
+  <p>Виталий, эксперт по сдаче коммерческой недвижимости, спросил: «А нейросеть реально встроится в моё существующее ПО?». Я полез доказывать. Сказал «да встроится, у нас есть API». Он начал контр-аргументировать: «А версия PHP какая поддерживается?». Я начал плавать. К концу разговора — он закрылся, попросил КП «в письменном виде», вышел.</p>
+
+  <p>В кейсе Ларисы (программист-Senior) была ровно та же ситуация. Она задала технический вопрос про обработку транскриптов. Я <strong>не полез отвечать</strong>. Сказал: «Лариса, это другой вопрос — на отдельной 30-минутной встрече с разработчиком разберём детали API. Сейчас давай вернёмся к тому, как мы разрулим твоё "ещё не начала продавать"». Возражение закрыто переключением, продажа сохранена.</p>
+
+  <h3 class="subhead">Сколько стоит</h3>
+  <p>Один проигранный спор в зоне экспертизы клиента = -100% продажи. Виталий не вернулся. Если в твоей ЦА много экспертов (юристы, программисты, врачи, маркетологи) — эта ошибка съедает 30-50% потенциальных сделок.</p>
+
+  <div class="formulation-label">Формулировка слово в слово</div>
+  <div class="formulation">
+    Слушай, это технический вопрос — я тебе сейчас отвечу что-то на пальцах, но ты в этом сильнее меня. Давай так: если по сути ты считаешь что программа тебе по делу — мы отдельной получасовой встречей с моим разработчиком проходим именно это, до старта. Если на той встрече технически не сходится — расходимся, ты ничего не платишь. Сейчас давай не я тебе доказывать буду, а вернёмся к твоей боли. Окей?
+  </div>
+
+  <p style="font-size: 9.5pt; color: var(--ink-soft); margin-top: 4mm;">Один ход. Возражение снято, экспертиза клиента признана, разговор продолжается.</p>
+
+  <div class="page-footer">
+    <span>Diagnostic Copilot</span>
+    <span>08</span>
+  </div>
+</section>
+
+<!-- ============ PAGE 9 — FINAL ============ -->
+<section class="page">
+  <div class="eyebrow">Финал</div>
+  <h1 class="section-title">Что с этим делать</h1>
+
+  <p>Перечитай 6 ошибок. Возьми последний свой звонок — записанный или по памяти. Отметь по каждой из 6: была эта ошибка или нет.</p>
+
+  <div class="final-bands">
+    <div class="band"><strong>Если 4-6 ошибок были</strong> — твоя конверсия диагностика → продажа в районе 10-20%. Это рынок.</div>
+    <div class="band"><strong>Если 2-3 ошибки</strong> — у тебя 25-40%. Это уже хорошо.</div>
+    <div class="band"><strong>Если 0-1 ошибка</strong> — у тебя 50%+. И ты в этой методичке узнал максимум одну новую вещь.</div>
+  </div>
+
+  <p>Дальше — два варианта.</p>
+
+  <p><strong>Первый.</strong> Распечатать этот PDF. Положить рядом с экраном. Каждый следующий звонок — отмечать галочкой все 6. За 3-4 недели они уйдут в автоматизм.</p>
+
+  <p><strong>Второй.</strong> Ты уже про это всё знаешь. Знал до этого PDF. Но в моменте звонка, когда нужно одновременно слушать клиента, считать что он сказал, держать структуру и принимать решения — у тебя нет ресурса вспомнить все 6.</p>
+
+  <p>Для второго случая я собрал <strong>Diagnostic Copilot</strong> — копилот, который слушает твой Zoom в реальном времени. Подсказывает: «архетип 4 — дотерпи до финального вопроса», «время произнести цену», «это возражение #5 — закрой через гарантию». Ты говоришь — он считает.</p>
+
+  <div class="cta-block">
+    <h3>Бесплатный технический разбор твоего звонка</h3>
+    <p>Если хочешь увидеть как копилот работает на ТВОЁМ звонке — приходи. 60 минут со мной. Что будет:</p>
+    <ol>
+      <li>Заранее присылаешь запись своей диагностики (любой, недавней).</li>
+      <li>Я прогоняю её через копилот ДО встречи. На звонке открываем отчёт вместе — где ты слил, где почти продал, какую из 6 ошибок повторил.</li>
+      <li>По 4 критериям проверим — наш ты клиент или нет. Если нет — скажу прямо, ничего не буду продавать.</li>
+      <li>Если да — расскажу условия. Решение за тобой.</li>
+    </ol>
+    <p style="margin-top: 4mm;">Это не «бесплатная консультация». Это технический разбор твоего звонка. Купишь — отлично. Не купишь — у тебя останется отчёт, который реально показывает где у тебя дыры.</p>
+    <a href="https://senler-page-link/" class="cta-button">Записаться на разбор →</a>
+  </div>
+
+  <div class="author-block">
+    <strong>Никита Русанов</strong><br>
+    Продаю экспертные программы через диагностические созвоны несколько лет.
+    Разобрал и систематизировал 7 реальных продающих звонков по транскриптам — отсюда 4 архетипа покупателя и 6 ошибок этого PDF.
+    Сейчас собираю Diagnostic Copilot вокруг этой системы.
+  </div>
+
+  <div class="page-footer">
+    <span>Diagnostic Copilot · 2026</span>
+    <span>09</span>
+  </div>
+</section>
+
+</body>
+</html>
