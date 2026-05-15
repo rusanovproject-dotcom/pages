@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Skills от Addy Osmani — гайд</title>
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --bg-card: #121829;
+    --bg-code: #0d1322;
+    --border: #1f2940;
+    --text: #e6ecf5;
+    --text-dim: #8a96b3;
+    --accent: #4f8fff;
+    --accent-glow: rgba(79, 143, 255, 0.15);
+    --good: #4ade80;
+    --warn: #fbbf24;
+    --danger: #f87171;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+    padding: 60px 24px;
+    min-height: 100vh;
+  }
+  .container { max-width: 880px; margin: 0 auto; }
+
+  header { margin-bottom: 56px; }
+  .tag {
+    display: inline-block;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    padding: 6px 12px;
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    margin-bottom: 20px;
+  }
+  h1 {
+    font-size: 44px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin-bottom: 16px;
+  }
+  h1 span { color: var(--accent); }
+  .subtitle {
+    font-size: 19px;
+    color: var(--text-dim);
+    max-width: 640px;
+  }
+  .meta {
+    display: flex;
+    gap: 24px;
+    margin-top: 24px;
+    font-size: 14px;
+    color: var(--text-dim);
+  }
+  .meta b { color: var(--text); }
+
+  h2 {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 64px 0 24px;
+    letter-spacing: -0.01em;
+  }
+  h2::before {
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 24px;
+    background: var(--accent);
+    border-radius: 2px;
+    margin-right: 14px;
+    vertical-align: -3px;
+  }
+  h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 28px 0 12px;
+    color: var(--text);
+  }
+  p { margin-bottom: 14px; color: var(--text); }
+  p.dim { color: var(--text-dim); }
+
+  ul, ol { margin: 8px 0 16px 24px; }
+  li { margin-bottom: 8px; }
+
+  code {
+    background: var(--bg-code);
+    border: 1px solid var(--border);
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-family: "SF Mono", "JetBrains Mono", Menlo, monospace;
+    font-size: 13.5px;
+    color: #e6ecf5;
+  }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px 28px;
+    margin: 20px 0;
+  }
+  .card.accent {
+    border-color: var(--accent);
+    box-shadow: 0 0 40px var(--accent-glow);
+  }
+
+  .pipeline {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    margin: 24px 0;
+  }
+  .step {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 10px;
+    text-align: center;
+    position: relative;
+  }
+  .step .num {
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+  }
+  .step .cmd {
+    font-family: "SF Mono", monospace;
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 600;
+    margin: 6px 0;
+    display: block;
+  }
+  .step .label {
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.3;
+  }
+  @media (max-width: 720px) {
+    .pipeline { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 10px;
+    margin: 20px 0;
+  }
+  .skill-pill {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+  .skill-pill b { color: var(--accent); display: block; margin-bottom: 4px; font-family: "SF Mono", monospace; font-size: 12px; }
+  .skill-pill span { color: var(--text-dim); }
+
+  pre {
+    background: var(--bg-code);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    overflow-x: auto;
+    font-family: "SF Mono", "JetBrains Mono", Menlo, monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    margin: 16px 0;
+    position: relative;
+  }
+  pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--text);
+    font-size: 13px;
+  }
+  .copy-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: var(--bg-card);
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    border-radius: 5px;
+    font-size: 11px;
+    cursor: pointer;
+    font-family: inherit;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transition: all 0.15s;
+  }
+  .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .copy-btn.copied { color: var(--good); border-color: var(--good); }
+
+  .rule {
+    display: flex;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .rule:last-child { border: none; }
+  .rule-icon {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .rule-icon.good { background: rgba(74, 222, 128, 0.12); color: var(--good); }
+  .rule-icon.bad { background: rgba(248, 113, 113, 0.12); color: var(--danger); }
+  .rule-icon.warn { background: rgba(251, 191, 36, 0.12); color: var(--warn); }
+  .rule-text b { display: block; margin-bottom: 4px; }
+  .rule-text span { color: var(--text-dim); font-size: 14px; }
+
+  .check-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .check-list li {
+    padding: 12px 0;
+    padding-left: 32px;
+    position: relative;
+    border-bottom: 1px solid var(--border);
+  }
+  .check-list li::before {
+    content: "☐";
+    position: absolute;
+    left: 8px;
+    color: var(--accent);
+    font-size: 18px;
+    top: 8px;
+  }
+
+  .callout {
+    background: linear-gradient(135deg, rgba(79, 143, 255, 0.08), rgba(79, 143, 255, 0.02));
+    border-left: 3px solid var(--accent);
+    padding: 16px 20px;
+    border-radius: 0 8px 8px 0;
+    margin: 20px 0;
+    font-size: 15px;
+  }
+  .callout b { color: var(--accent); }
+
+  footer {
+    margin-top: 100px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 13px;
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <span class="tag">Гайд · 2026-05-16</span>
+  <h1>Agent Skills от <span>Addy Osmani</span></h1>
+  <p class="subtitle">Превращаем Claude Code в senior-инженера: spec → plan → build → test → review → ship. Автоматически, без напоминаний.</p>
+  <div class="meta">
+    <div><b>41.9k</b> ⭐ на GitHub</div>
+    <div><b>23</b> скилла</div>
+    <div><b>7</b> команд</div>
+    <div><b>MIT</b> лицензия</div>
+  </div>
+</header>
+
+<h2>Что это вообще такое</h2>
+<p>Пак скиллов от Addy Osmani (Google Chrome) — кодит не «накидаю и побежали», а как senior: пишет спеку, режет на атомарные шаги, тестирует, ревьюит, упрощает, шипит. Каждая фаза — отдельная команда + автоматически подтягиваемый скилл.</p>
+<p class="dim">Применяй только в репах с кодом: <code>apps/atlas-v2</code>, <code>apps/project-x</code>, <code>apps/openclaw</code>, <code>apps/pomodoro-ai</code>, <code>automations/shared-hub</code>. В <code>office/</code> и контенте — не нужен.</p>
+
+<h2>Пайплайн — 7 команд</h2>
+<p>Эти 7 команд = lifecycle любой инженерной задачи. Не пропускай фазы — каждая ловит свой класс багов до прода.</p>
+
+<div class="pipeline">
+  <div class="step"><span class="num">01</span><span class="cmd">/spec</span><span class="label">что строим</span></div>
+  <div class="step"><span class="num">02</span><span class="cmd">/plan</span><span class="label">атомарные шаги</span></div>
+  <div class="step"><span class="num">03</span><span class="cmd">/build</span><span class="label">по одному</span></div>
+  <div class="step"><span class="num">04</span><span class="cmd">/test</span><span class="label">тесты = доказательство</span></div>
+  <div class="step"><span class="num">05</span><span class="cmd">/review</span><span class="label">ревью до мержа</span></div>
+  <div class="step"><span class="num">06</span><span class="cmd">/code-simplify</span><span class="label">резать жир</span></div>
+  <div class="step"><span class="num">07</span><span class="cmd">/ship</span><span class="label">в прод</span></div>
+</div>
+
+<div class="card">
+<h3>Логика каждой фазы</h3>
+<ul>
+<li><b>/spec</b> — «спецификация до кода». Что строим, критерии готовности, что НЕ строим. Без неё <code>/plan</code> = угадайка.</li>
+<li><b>/plan</b> — мелкие атомарные таски. Если шаг описан «реализовать модуль X» — это не план, а название задачи.</li>
+<li><b>/build</b> — один слайс за раз. Не пишет три фичи параллельно.</li>
+<li><b>/test</b> — тесты как доказательство, не как украшение. TDD приоритет.</li>
+<li><b>/review</b> — субагент <code>code-reviewer</code> с чистым контекстом смотрит свежим взглядом.</li>
+<li><b>/code-simplify</b> — clarity over cleverness. Меньше строк, понятнее имена.</li>
+<li><b>/ship</b> — только когда зелёный CI. Faster is safer = маленькими порциями.</li>
+</ul>
+</div>
+
+<h2>23 скилла — авто-активация</h2>
+<p>Скиллы триггерятся сами по контексту того, что ты делаешь. Не нужно вызывать вручную.</p>
+
+<div class="skills-grid">
+  <div class="skill-pill"><b>api-and-interface-design</b><span>проектируешь API</span></div>
+  <div class="skill-pill"><b>frontend-ui-engineering</b><span>пишешь UI</span></div>
+  <div class="skill-pill"><b>debugging-and-error-recovery</b><span>дебажишь баг</span></div>
+  <div class="skill-pill"><b>performance-optimization</b><span>ускоряешь код</span></div>
+  <div class="skill-pill"><b>security-and-hardening</b><span>закрываешь дыры</span></div>
+  <div class="skill-pill"><b>test-driven-development</b><span>пишешь тесты</span></div>
+  <div class="skill-pill"><b>spec-driven-development</b><span>спецификация</span></div>
+  <div class="skill-pill"><b>planning-and-task-breakdown</b><span>декомпозиция</span></div>
+  <div class="skill-pill"><b>incremental-implementation</b><span>пишешь слайсами</span></div>
+  <div class="skill-pill"><b>code-review-and-quality</b><span>ревью</span></div>
+  <div class="skill-pill"><b>code-simplification</b><span>упрощаешь</span></div>
+  <div class="skill-pill"><b>git-workflow-and-versioning</b><span>коммиты, PR</span></div>
+  <div class="skill-pill"><b>ci-cd-and-automation</b><span>пайплайны</span></div>
+  <div class="skill-pill"><b>shipping-and-launch</b><span>деплой</span></div>
+  <div class="skill-pill"><b>browser-testing-with-devtools</b><span>тесты в браузере</span></div>
+  <div class="skill-pill"><b>deprecation-and-migration</b><span>миграции</span></div>
+  <div class="skill-pill"><b>documentation-and-adrs</b><span>ADR-документы</span></div>
+  <div class="skill-pill"><b>context-engineering</b><span>управление контекстом</span></div>
+  <div class="skill-pill"><b>doubt-driven-development</b><span>сомнение как метод</span></div>
+  <div class="skill-pill"><b>source-driven-development</b><span>работа с источниками</span></div>
+  <div class="skill-pill"><b>idea-refine</b><span>уточнение идеи</span></div>
+  <div class="skill-pill"><b>interview-me</b><span>интервью под спеку</span></div>
+  <div class="skill-pill"><b>using-agent-skills</b><span>как пользоваться паком</span></div>
+</div>
+
+<h2>Установка — 2 шага</h2>
+
+<h3>Шаг 1. Поставить плагин в Claude Code</h3>
+<p>Один раз глобально. Внутри проекта команды сразу подхватываются.</p>
+
+<pre><button class="copy-btn" data-target="install">Copy</button><code id="install">/plugin marketplace add addyosmani/agent-skills
+/plugin install agent-skills@addy-agent-skills</code></pre>
+
+<p class="dim">Если SSH-ключи не настроены — используй HTTPS:</p>
+<pre><button class="copy-btn" data-target="install-https">Copy</button><code id="install-https">/plugin marketplace add https://github.com/addyosmani/agent-skills.git
+/plugin install agent-skills@addy-agent-skills</code></pre>
+
+<h3>Шаг 2. Прописать правила в CLAUDE.md проекта</h3>
+<p>Это сердце гайда. Скопируй блок и вставь в <code>CLAUDE.md</code> того репа, где живёт код (например, <code>apps/atlas-v2/CLAUDE.md</code>). После этого Claude Code сам поведёт задачи по пайплайну.</p>
+
+<div class="card accent">
+<h3>Готовый промт для CLAUDE.md</h3>
+<pre><button class="copy-btn" data-target="claude-md">Copy</button><code id="claude-md">## Engineering Workflow — addyosmani/agent-skills
+
+В этом репо живёт код. Любая инженерная задача (фича, баг, рефакторинг,
+миграция, перформанс) идёт по пайплайну. Мелкие правки (&lt; 20 строк,
+один файл, нет логики) — без пайплайна, остальное — обязательно.
+
+### Lifecycle — обязательная последовательность
+
+1. /spec      — спецификация до кода (что строим, критерии готовности,
+                что НЕ строим). Без неё план = угадайка.
+2. /plan      — атомарные шаги по 15-30 минут. Если шаг «реализовать
+                модуль X» — это не план, режь дальше.
+3. /build     — один слайс за раз. Не пиши параллельно несколько фич.
+                После каждого слайса — коммит.
+4. /test      — тесты как доказательство. TDD приоритет: красный →
+                зелёный → рефакторинг.
+5. /review    — обязательно вызови субагента code-reviewer с чистым
+                контекстом. Дополнительно security-auditor если код
+                трогает auth/payments/data.
+6. /code-simplify — пройди и сократи на 10-20%. Clarity over cleverness.
+7. /ship      — только когда зелёный CI и все тесты прошли.
+
+### Правила без исключений
+
+- НЕ пропускай /spec для задач > мелкой правки. Без спеки нет критериев
+  готовности — задача никогда не «закончена».
+- Атомарные коммиты. Один коммит = одно изменение, объяснимое одной
+  строкой.
+- Тесты до /ship обязательны. «Запушу и потом тесты допишу» = технический
+  долг.
+- Перед merge — субагент code-reviewer, не самопроверка.
+- Прямой push в main запрещён. Только PR.
+
+### Авто-активация скиллов
+
+Когда задача касается домена — автоматически подключай соответствующий
+скилл (не спрашивай разрешения):
+
+- API / endpoints / контракты      → api-and-interface-design
+- UI / React / компоненты          → frontend-ui-engineering
+- Баг / падение / unexpected       → debugging-and-error-recovery
+- Скорость / N+1 / память          → performance-optimization
+- Auth / input / секреты           → security-and-hardening
+- Тесты / coverage                 → test-driven-development
+- Декомпозиция / план              → planning-and-task-breakdown
+- Git / коммиты / PR               → git-workflow-and-versioning
+- CI / деплой                      → ci-cd-and-automation
+- Браузерные тесты                 → browser-testing-with-devtools
+- Удаление API / переезд           → deprecation-and-migration
+- Архитектурное решение            → documentation-and-adrs (пиши ADR)
+
+### Субагенты
+
+- code-reviewer    — обязательный перед merge
+- security-auditor — для всего что трогает auth, payments, user data,
+                     external API, секреты
+- test-engineer    — когда coverage низкий или тесты хрупкие
+
+### Стоп-сигналы (что прерывает работу)
+
+- Тест упал 2 раза подряд → /rewind, не корректирующими промптами.
+- Не понятно зачем фича → вернись к /spec, не пиши код.
+- &gt; 3 файла меняется без плана → стоп, /plan.
+- Хочется добавить «на всякий случай» → не добавляй (YAGNI).
+
+### Что НЕ покрывает этот пайплайн
+
+- Контентные задачи (посты, лендинги, офферы) — другой пак.
+- Research / discovery без кода — параллельные субагенты, не lifecycle.
+- Конфиги, README, документация одиночная — мелкая правка, без /spec.
+</code></pre>
+</div>
+
+<h2>Правила качественного использования</h2>
+
+<div class="card">
+<div class="rule">
+  <div class="rule-icon good">✓</div>
+  <div class="rule-text">
+    <b>Доверяй авто-активации</b>
+    <span>Скиллы триггерятся по контексту. Не вызывай руками — пиши задачу нормальным языком, агент сам подтянет нужное.</span>
+  </div>
+</div>
+<div class="rule">
+  <div class="rule-icon good">✓</div>
+  <div class="rule-text">
+    <b>Начинай с /spec</b>
+    <span>30 секунд спеки экономят 2 часа переделок. Особенно для новых фич.</span>
+  </div>
+</div>
+<div class="rule">
+  <div class="rule-icon good">✓</div>
+  <div class="rule-text">
+    <b>Атомарные слайсы в /build</b>
+    <span>Один коммит = одна мысль. Если откатывать — откатываешь один шаг, а не весь день.</span>
+  </div>
+</div>
+<div class="rule">
+  <div class="rule-icon bad">✗</div>
+  <div class="rule-text">
+    <b>Не пропускай /review</b>
+    <span>Самопроверка = не проверка. Code-reviewer с чистым контекстом ловит то, что ты не видишь.</span>
+  </div>
+</div>
+<div class="rule">
+  <div class="rule-icon bad">✗</div>
+  <div class="rule-text">
+    <b>Не комбинируй пайплайн с маркетинговыми скиллами</b>
+    <span>Этот пак — только для кода. В контенте у тебя свой пак (alex-marketer-pack, copywriting).</span>
+  </div>
+</div>
+<div class="rule">
+  <div class="rule-icon warn">!</div>
+  <div class="rule-text">
+    <b>Мелкие правки — без пайплайна</b>
+    <span>Опечатка в README, переименование переменной, фикс одной строки — не требуют /spec. Не превращай в карго-культ.</span>
+  </div>
+</div>
+</div>
+
+<h2>Чек-лист проверки после установки</h2>
+<p>Прогони эти 6 проверок, чтобы убедиться что всё работает.</p>
+
+<ol class="check-list">
+<li>Открой репо с кодом (например, <code>apps/atlas-v2</code>), запусти Claude Code, набери <code>/spec</code> — должна появиться команда из плагина, не «команда не найдена».</li>
+<li>Скажи Claude Code: <code>«создай новый эндпоинт /users/me»</code> — он должен сам предложить начать со <code>/spec</code>, не сразу писать код.</li>
+<li>На фазе <code>/review</code> проверь что субагент <code>code-reviewer</code> подключается — должна быть строка «подключился code-reviewer» или эквивалент.</li>
+<li>Скажи Claude Code: <code>«найди где у нас N+1 в запросах»</code> — авто-должен подключиться <code>performance-optimization</code>.</li>
+<li>Попробуй прямой push в main — должно блокироваться (если правило git-workflow подключено).</li>
+<li>В <code>~/.claude/plugins/</code> или через <code>/plugin list</code> — убедись что <code>agent-skills@addy-agent-skills</code> в списке активных.</li>
+</ol>
+
+<div class="callout">
+<b>Главное.</b> Этот пак — не «дополнительные команды». Это <b>дисциплина senior-инженера, прошитая в агента</b>. Польза появляется, когда ты перестаёшь его обходить — «давай быстро напишу, потом тесты». Каждый раз когда обходишь — обнуляешь смысл пака.
+</div>
+
+<h2>Что дальше</h2>
+<p>После установки и обкатки на одном репе:</p>
+<ul>
+<li>Раскатить на остальные <code>apps/*</code></li>
+<li>Подумать, какие скиллы оттуда стоит адаптировать в свой офис (<code>doubt-driven-development</code>, <code>context-engineering</code>, <code>idea-refine</code> — интересные кандидаты)</li>
+<li>Сравнить с пайплайном <code>compound-engineering</code>, который у тебя уже стоит — где они дополняют друг друга, где конфликтуют</li>
+</ul>
+
+<footer>
+  <p>Репо: <a href="https://github.com/addyosmani/agent-skills" target="_blank">github.com/addyosmani/agent-skills</a> · MIT · 41.9k ⭐</p>
+  <p>Гайд собран 2026-05-16 · Atlas / AI Office v2</p>
+</footer>
+
+</div>
+
+<script>
+document.querySelectorAll('.copy-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = document.getElementById(btn.dataset.target);
+    navigator.clipboard.writeText(target.textContent).then(() => {
+      btn.textContent = 'Copied';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 1500);
+    });
+  });
+});
+</script>
+</body>
+</html>
